@@ -1,0 +1,145 @@
+openapi: 3.0.0
+servers:
+  - url: https://api.trythis.zip/v1
+    variables: {}
+info:
+  description: API for remotely handling bulk compression asynchronously.
+  version: 0.1.0
+  title: TryThis.Zip API
+  termsOfService: https://trythis.zip/terms-of-service
+  contact:
+    email: layla@layla.gg
+    name: Layla Manley
+    url: trythis.zip
+
+externalDocs:
+  description: https://github.com/yeslayla/trythis.zip/wiki
+  url: https://github.com/yeslayla/trythis.zip/wiki
+  
+paths:
+  /status:
+    get:
+      description: |
+        Returns 200 if API is operational
+      operationId: getStatus
+      tags:
+        - utility
+      parameters: []
+      responses:
+        "200":
+          description: API is operational
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /jobs/compress:
+    put:
+      description: |
+        Triggers a new compression job
+      operationId: triggerCompressionJob
+      tags:
+        - compression
+      parameters:
+        - name: storage_source
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: file_pattern
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: storage_destination
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: file_destination
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: compression_type
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Job started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompressionJob"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /jobs/compress/{job_id}:
+    get:
+      description: |
+        Gets job status and metadata
+      operationId: getCompressionJob
+      tags:
+        - compression
+      parameters:
+        - name: job_id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompressionJob"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      
+tags:
+  - name: utility
+    description: Used for operational utility
+  - name: compression
+    description: Used for compression jobs
+components:
+  schemas:
+    CompressionJob:
+      type: object
+      required:
+        - id
+        - status
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  requestBodies: {}
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+  links: {}
+  callbacks: {}
+security: []
